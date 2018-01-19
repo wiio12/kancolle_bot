@@ -4,8 +4,12 @@ import operator
 import random
 import time
 
-import autopy
 from PIL import Image, ImageGrab
+
+try:
+    import autopy
+except ImportError:
+    import autopy_wrapper as autopy
 
 
 def get_time():
