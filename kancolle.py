@@ -3,6 +3,8 @@ import itertools
 import operator
 import random
 import time
+import find_bitmap_cv
+import cv2
 
 from PIL import Image, ImageGrab
 
@@ -55,9 +57,9 @@ def find_bitmap(img, base, rect=50):
                 dist = d
                 mi, mj = i, j
             if d <= 5:
-                # print '检测图像dist：', dist
+                print '检测图像dist：', dist
                 return mi, mj
-    # print '检测图像dist：', dist
+    print '检测图像dist：', dist
     if dist >= 50:
         return None
     return mi, mj
@@ -74,6 +76,7 @@ class KancolleStatus:
         self.__init_yuanzheng()
         self.status = 'mugang'
         self.YZ_set = {1: 0, 2: 0, 3: 0, 4: 0}
+        self.reset_base()
 
     def __init_pic(self):
         """图片构造函数，图片资源都在这里读取初始化"""
@@ -85,6 +88,8 @@ class KancolleStatus:
         pic_page_xuan = Image.open('img/page/page_xuan.png')
         pic_page_yuanzheng = Image.open('img/page/page_yuanzheng.png')
 
+        pic_base = cv2.imread('img/shezhi.png')
+
         self.pic_map = {
             'pic_shezhi': pic_shezhi,
             'pic_yanzheng': pic_yuanzheng,
@@ -92,7 +97,9 @@ class KancolleStatus:
             'pic_quanbuji': pic_quanbuji,
             'pic_page_buji': pic_page_buji,
             'pic_page_xuan': pic_page_xuan,
-            'pic_page_yuanzheng': pic_page_yuanzheng
+            'pic_page_yuanzheng': pic_page_yuanzheng,
+
+            'pic_base': pic_base
         }
 
     def __init_btn(self):
@@ -191,6 +198,19 @@ class KancolleStatus:
             39: ('5', '07'), 40: ('5', '08')
         }
 
+    def reset_base(self):
+        ImageGrab.grab().save('screen.png')
+        screen = cv2.imread('screen.png')
+
+        ret = find_bitmap_cv.find_bitmap_cv(screen, self.pic_map['pic_base'])
+        # TODO: what if no match
+        #if ret is None:
+        #    autopy.alert.alert('请处于母港界面重置Kancolle')
+        self.x = ret[0] - 764
+        self.y = ret[1] - 441
+        #autopy.mouse.smooth_move(self.x, self.y)
+        #print ret
+
     def __click_btn(self, btn):
         """按下一个按钮，btn传入一个字符串，是上面dict的名字
         :type btn: String 按按钮的名字
@@ -266,7 +286,7 @@ class KancolleStatus:
         bx = self.x + pos[0]
         by = self.y + pos[1]
         bitmap = self.pic_map[pic]
-        # print '检查图片' + pic
+        print '检查图片' + pic
         return find_bitmap(bitmap, (bx, by))
 
     def __check_page(self, page):
@@ -293,7 +313,7 @@ class KancolleStatus:
         bx = self.x + pos[0]
         by = self.y + pos[1]
         bitmap = self.pic_map[pic]
-        # print '检查图片', pic
+        print '检查图片', pic
         c = 0
         while True:
             ret = find_bitmap(bitmap, (bx, by))
@@ -331,8 +351,8 @@ class KancolleStatus:
 
     def send_yuanzheng(self, team, yz_num):
         yzp = self.YZ_map[yz_num]
-        dao = 'yz_d' + yzp[0]    # 岛号
-        pos = 'yz_' + yzp[1]     # 远征位置号
+        dao = 'yz_d' + yzp[0]  # 岛号
+        pos = 'yz_' + yzp[1]  # 远征位置号
         te = 'yz_s' + str(team)  # 队伍号
         self.__click_btn(dao)
         self.__wait()
@@ -448,7 +468,10 @@ ks = KancolleStatus(0, 30)
 # ks.auto_retrive()
 # ks.goto_yuanzheng()
 # ks.send_yuanzheng(3,11)
+
 ks.set_yz(2, 2)
 ks.set_yz(3, 5)
 ks.set_yz(4, 6)
 ks.enable_auto_yz()
+
+#ks.reset_base()
