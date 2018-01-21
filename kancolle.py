@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-import itertools
-import operator
 import random
 import time
-import find_bitmap_cv
 import cv2
+import kancolle_img
 
 from PIL import Image, ImageGrab
 
@@ -28,45 +26,8 @@ def print_debug(msg):
     print msg
 
 
-def get_hash(img):
-    """获取图片的hash，内部方法不需要知道干嘛用"""
-    im = img.resize((16, 12), Image.ANTIALIAS).convert('L')
-    pixels = list(im.getdata())
-    avg = sum(pixels) / len(pixels)
-    return ''.join(map(lambda p: '1' if p > avg else '0', pixels))
-
-
-def hamming_dest(hash1, hash2):
-    """同内部方法，不需要直达怎么用"""
-    return sum(itertools.imap(operator.ne, hash1, hash2))
-
-
-def find_bitmap(img, base, rect=50):
-    """在一定区域内找图，img是图片，base是左上角坐标，rect是找图区域"""
-    current = ImageGrab.grab()
-    imhash = get_hash(img)
-    dist = 1000000
-    mi, mj = 0, 0
-    for i in range(base[0], base[0] + rect):
-        for j in range(base[1], base[1] + rect):
-            tm = current.crop((i, j, i + img.size[0], j + img.size[1]))
-            tmhash = get_hash(tm)
-            d = hamming_dest(tmhash, imhash)
-            # print i,j
-            if d < dist:
-                dist = d
-                mi, mj = i, j
-            if d <= 5:
-                print '检测图像dist：', dist
-                return mi, mj
-    print '检测图像dist：', dist
-    if dist >= 50:
-        return None
-    return mi, mj
-
-
 class KancolleStatus:
-    def __init__(self, x, y):
+    def __init__(self, x=0, y=0):
         """构造函数，初始化一些资源"""
         self.x = x
         self.y = y
@@ -202,14 +163,14 @@ class KancolleStatus:
         ImageGrab.grab().save('screen.png')
         screen = cv2.imread('screen.png')
 
-        ret = find_bitmap_cv.find_bitmap_cv(screen, self.pic_map['pic_base'])
+        ret = kancolle_img.find_bitmap_cv(screen, self.pic_map['pic_base'])
         # TODO: what if no match
-        #if ret is None:
+        # if ret is None:
         #    autopy.alert.alert('请处于母港界面重置Kancolle')
         self.x = ret[0] - 764
         self.y = ret[1] - 441
-        #autopy.mouse.smooth_move(self.x, self.y)
-        #print ret
+        # autopy.mouse.smooth_move(self.x, self.y)
+        # print ret
 
     def __click_btn(self, btn):
         """按下一个按钮，btn传入一个字符串，是上面dict的名字
@@ -287,7 +248,7 @@ class KancolleStatus:
         by = self.y + pos[1]
         bitmap = self.pic_map[pic]
         print '检查图片' + pic
-        return find_bitmap(bitmap, (bx, by))
+        return kancolle_img.find_bitmap(bitmap, (bx, by))
 
     def __check_page(self, page):
         temp = self.page_map[page]
@@ -316,7 +277,7 @@ class KancolleStatus:
         print '检查图片', pic
         c = 0
         while True:
-            ret = find_bitmap(bitmap, (bx, by))
+            ret = kancolle_img.find_bitmap(bitmap, (bx, by))
             if ret is None:
                 self.__wait(1, 0.5)
                 c += 1
@@ -459,7 +420,7 @@ class KancolleStatus:
             self.__wait(300, 100)
 
 
-ks = KancolleStatus(0, 30)
+ks = KancolleStatus()
 # ks.return_mugang()
 # ks.retrive_yuanzheng()
 # ks.retrive_yuanzheng()
@@ -474,4 +435,4 @@ ks.set_yz(3, 5)
 ks.set_yz(4, 6)
 ks.enable_auto_yz()
 
-#ks.reset_base()
+# ks.reset_base()
