@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#coding=utf-8
 import random
 import time
 import cv2
@@ -31,6 +32,8 @@ class KancolleStatus:
         """构造函数，初始化一些资源"""
         self.x = x
         self.y = y
+        self.mainx = 41
+        self.mainy = 136
         self.__init_btn()
         self.__init_pic()
         self.__init_page()
@@ -49,7 +52,8 @@ class KancolleStatus:
         pic_page_xuan = Image.open('img/page/page_xuan.png')
         pic_page_yuanzheng = Image.open('img/page/page_yuanzheng.png')
 
-        pic_base = cv2.imread('img/shezhi.png')
+        pic_mugang = cv2.imread('img/mugang.png')
+        pic_base = cv2.imread('img/mugang.png')
 
         self.pic_map = {
             'pic_shezhi': pic_shezhi,
@@ -60,7 +64,8 @@ class KancolleStatus:
             'pic_page_xuan': pic_page_xuan,
             'pic_page_yuanzheng': pic_page_yuanzheng,
 
-            'pic_base': pic_base
+            'pic_base': pic_base,
+            'pic_mugang': pic_mugang
         }
 
     def __init_btn(self):
@@ -167,8 +172,17 @@ class KancolleStatus:
         # TODO: what if no match
         # if ret is None:
         #    autopy.alert.alert('请处于母港界面重置Kancolle')
-        self.x = ret[0] - 764
-        self.y = ret[1] - 441
+        #self.x = ret[0] - 764
+        #self.y = ret[1] - 441
+        #记录下这个重要的坐标
+        self.mainx = ret[0]
+        self.mainy = ret[1]
+        self.x = ret[0] - 36
+        self.y = ret[1] - 97
+        print_msg('base set at: (' + str(self.x) + ', ' + str(self.y) + ')')
+        print_msg('mainx: ' + str(self.mainx) + ' mainy: ' + str(self.mainy))
+        #self.x = ret[0]
+        #self.y = ret[1]
         # autopy.mouse.smooth_move(self.x, self.y)
         # print ret
 
@@ -247,8 +261,21 @@ class KancolleStatus:
         bx = self.x + pos[0]
         by = self.y + pos[1]
         bitmap = self.pic_map[pic]
-        print '检查图片' + pic
+        print "__check_pic", pic
         return kancolle_img.find_bitmap(bitmap, (bx, by))
+
+    def __check_pic_mugang_cv(self):
+        ImageGrab.grab().save('screen.png')
+        img = cv2.imread('screen.png')
+
+        template = self.pic_map['pic_mugang']
+
+        top_left = kancolle_img.find_bitmap_cv(img, template)
+        if (abs(top_left[0] - self.mainx) <= 10) and (abs(top_left[1] - self.mainy) <= 10):
+            ret = True
+        else:
+            ret = None
+        return ret
 
     def __check_page(self, page):
         temp = self.page_map[page]
@@ -264,6 +291,18 @@ class KancolleStatus:
     def __wait_network(self):
         """等待网络延时，还不知道怎么写"""
         pass
+
+    def __wait_check_mugang_cv(self, pic):
+        template = self.pic_map[pic]
+
+        while True:
+            ImageGrab.grab().save('screen.png')
+            img = cv2.imread('screen.png')
+            top_left = kancolle_img.find_bitmap_cv(img, template)
+            if (abs(top_left[0] - self.mainx) <= 10) and (abs(top_left[1] - self.mainy) <= 10):
+                print '__wait_check_mugang_cv :在母港'
+                break
+            print '__wait_check_mugang_cv :不在母港'
 
     def __wait_check(self, pos, pic):
         """循环等待，直到检测到对应的图案
@@ -293,8 +332,13 @@ class KancolleStatus:
         :type page: String 页面名称
         """
         temp = self.page_map[page]
-        self.__wait()
-        ret = self.__check_pic(temp[0], temp[1])
+
+        if page is 'page_mugang':
+            #增加针对母港的情况
+            ret = self.__check_pic_mugang_cv()
+        else:
+            self.__wait()
+            ret = self.__check_pic(temp[0], temp[1])
         if ret is None:
             self.__click_btn(temp[2])
             self.__wait_check(temp[0], temp[1])
@@ -344,7 +388,8 @@ class KancolleStatus:
         ret = self.__check_pic('pos_yuanzhenghuilai', 'pic_yanzheng')
         if ret is None:
             self.refresh_mugang()
-            self.__wait(0, 1)
+            #self.__wait_check('shezhi', 'pic_mugang')#pic_shezhi -> pic_mugang
+            self.__wait_check_mugang_cv('pic_mugang') #循环等待回到母港
             ret = self.__check_pic('pos_yuanzhenghuilai', 'pic_yanzheng')
             if ret is None:
                 print_msg('检查远征后未有远征队回来')
@@ -355,7 +400,8 @@ class KancolleStatus:
         self.__click_rand_pos()
         self.__click()
         print_msg('收回一队远征')
-        self.__wait_check('shezhi', 'pic_shezhi')
+        #self.__wait_check('shezhi', 'pic_mugang') #pic_shezhi -> pic_mugang
+        self.__wait_check_mugang_cv('pic_mugang') #循环等待回到母港
         self.status = 'mugang'
         return 1
 
