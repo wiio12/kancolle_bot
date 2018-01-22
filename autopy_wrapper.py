@@ -10,18 +10,18 @@ class mouse:
     def smooth_move(x, y):
         cur_pos = pyautogui.position()
         dis = math.sqrt((cur_pos[0] - x)*(cur_pos[0] - x) + (cur_pos[1] - y)*(cur_pos[1] - y))
-        time = dis / random.randint(1500, 2000)
-        print time
-        return pyautogui.moveTo(x, y, time)
+        times = dis / random.randint(1500, 2000)
+        return pyautogui.moveTo(x, y, times)
 
     @staticmethod
     def click():
         times = random.randint(2, 4)
-        while times > 0:
-            interval = random.randint(80, 150) / 1000
-            pyautogui.click(None, None, 1)
-            time.sleep(interval)
-            times = times - 1
+        interval = random.randint(80, 150) / 1000
+        pyautogui.click(None, None, 2, interval)
+        time.sleep(interval)
+        times = times - 2
+        interval = random.randint(80, 150) / 1000
+        pyautogui.click(None, None, times, interval)
 
 
 class alert:

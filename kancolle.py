@@ -172,6 +172,7 @@ class KancolleStatus:
         # TODO: what if no match
         # if ret is None:
         #    autopy.alert.alert('请处于母港界面重置Kancolle')
+<<<<<<< HEAD
         #self.x = ret[0] - 764
         #self.y = ret[1] - 441
         #记录下这个重要的坐标
@@ -185,6 +186,11 @@ class KancolleStatus:
         #self.y = ret[1]
         # autopy.mouse.smooth_move(self.x, self.y)
         # print ret
+=======
+        self.x = ret[0] - 764
+        self.y = ret[1] - 441
+        print_msg('base set at: (' + str(self.x) + ', ' + str(self.y) + ')')
+>>>>>>> 41ae797de1c58702cd04448ab5d0e61abe4fada1
 
     def __click_btn(self, btn):
         """按下一个按钮，btn传入一个字符串，是上面dict的名字
@@ -388,8 +394,12 @@ class KancolleStatus:
         ret = self.__check_pic('pos_yuanzhenghuilai', 'pic_yanzheng')
         if ret is None:
             self.refresh_mugang()
+<<<<<<< HEAD
             #self.__wait_check('shezhi', 'pic_mugang')#pic_shezhi -> pic_mugang
             self.__wait_check_mugang_cv('pic_mugang') #循环等待回到母港
+=======
+            self.__wait_check('shezhi', 'pic_shezhi')
+>>>>>>> 41ae797de1c58702cd04448ab5d0e61abe4fada1
             ret = self.__check_pic('pos_yuanzhenghuilai', 'pic_yanzheng')
             if ret is None:
                 print_msg('检查远征后未有远征队回来')
@@ -445,6 +455,7 @@ class KancolleStatus:
             # TODO: wait
             self.__wait(0.5, 0.5)
             self.__click_btn('main_return')
+            self.__wait_check('shezhi', 'pic_shezhi')
             self.status = 'mugang'
         return ret
 
