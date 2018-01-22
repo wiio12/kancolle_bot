@@ -246,7 +246,7 @@ class KancolleStatus:
         bx = self.x + pos[0]
         by = self.y + pos[1]
         bitmap = self.pic_map[pic]
-        print '检查图片' + pic
+        print '检查图片' , pic
         return kancolle_img.find_bitmap(bitmap, (bx, by))
 
     def __check_page(self, page):

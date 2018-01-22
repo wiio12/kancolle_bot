@@ -19,13 +19,13 @@ def find_bitmap_cv(img, template):
     res = cv2.matchTemplate(img_gray, template_gray, cv2.TM_CCOEFF)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
     top_left = max_loc
-    print max_val, min_val
+    #print max_val, min_val
     return top_left
 
 
 def __get_hash(img):
     """获取图片的hash，内部方法不需要知道干嘛用"""
-    im = img.resize((16, 12), Image.ANTIALIAS).convert('L')
+    im = img.resize((20, 12), Image.ANTIALIAS).convert('L')
     pixels = list(im.getdata())
     avg = sum(pixels) / len(pixels)
     return ''.join(map(lambda p: '1' if p > avg else '0', pixels))
