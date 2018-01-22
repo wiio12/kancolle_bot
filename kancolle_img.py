@@ -19,7 +19,6 @@ def find_bitmap_cv(img, template):
     res = cv2.matchTemplate(img_gray, template_gray, cv2.TM_CCOEFF)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
     top_left = max_loc
-    #print max_val, min_val
     return top_left
 
 
