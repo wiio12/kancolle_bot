@@ -3,6 +3,11 @@
 It's a **kantai collection** bot
 for test only
 
+启动前：  
++ 使用poi的截图工具截图
++ 复制截图，保存到根目录
++ 改变文件名称为`Game.png`
+
 # Understanding wiio's code :V
 
 ## 变量
