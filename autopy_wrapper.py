@@ -28,3 +28,19 @@ class alert:
     @staticmethod
     def alert(msg, title='autopyAlert', default_button='OK'):
         return pyautogui.alert(msg, title, default_button)
+
+class screen:
+    @staticmethod
+    def get_size():
+        return pyautogui.size()
+
+'''
+print pyautogui.size()
+mouse.smooth_move(10,42)
+time.sleep(3)
+mouse.smooth_move(810,522)
+'''
+
+
+
+

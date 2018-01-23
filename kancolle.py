@@ -29,8 +29,18 @@ def print_debug(msg):
 class KancolleStatus:
     def __init__(self, x=0, y=0):
         """构造函数，初始化一些资源"""
-        self.x = x
-        self.y = y
+        self.x = x    # autopy的x坐标
+        self.y = y    # autopy的y坐标
+
+        # 计算屏幕分辨率和鼠标分辨率的比率
+        self.x_rate = kancolle_img.X_RATE
+        self.y_rate = kancolle_img.Y_RATE
+        sx = kancolle_img.get_screenshot_size()
+        mx = autopy.screen.get_size()
+        self.x_base_rate = sx[0] / float(mx[0])
+        self.y_base_rate = sx[1] / float(mx[1])
+        print 'screen rate:', self.x_rate, self.y_rate
+        print 'game resolution: ', kancolle_img.GAME_SIZE
         self.__init_btn()
         self.__init_pic()
         self.__init_page()
@@ -162,14 +172,17 @@ class KancolleStatus:
     def reset_base(self):
         ImageGrab.grab().save('screen.png')
         screen = cv2.imread('screen.png')
+        game = cv2.imread('Game.png')
 
-        ret = kancolle_img.find_bitmap_cv(screen, self.pic_map['pic_base'])
+        ret = kancolle_img.find_bitmap_cv(screen, game)
         # TODO: what if no match
         # if ret is None:
         #    autopy.alert.alert('请处于母港界面重置Kancolle')
-        self.x = ret[0] - 764
-        self.y = ret[1] - 441
+
+        self.x = int(ret[0] / self.x_base_rate)
+        self.y = int(ret[1] / self.y_base_rate)
         print_msg('base set at: (' + str(self.x) + ', ' + str(self.y) + ')')
+        autopy.mouse.smooth_move(self.x, self.y)
 
     def __click_btn(self, btn):
         """按下一个按钮，btn传入一个字符串，是上面dict的名字
@@ -243,11 +256,11 @@ class KancolleStatus:
         :return : tuple
         """
         pos = self.pos_map[pos]
-        bx = self.x + pos[0]
-        by = self.y + pos[1]
+        bx = int(self.x * self.x_base_rate + pos[0] * self.x_rate)
+        by = int(self.y * self.x_base_rate + pos[1] * self.y_rate)
         bitmap = self.pic_map[pic]
         print '检查图片' , pic
-        return kancolle_img.find_bitmap(bitmap, (bx, by))
+        return kancolle_img.find_bitmap(bitmap, (bx, by), int(50 * self.x_base_rate))
 
     def __check_page(self, page):
         temp = self.page_map[page]
@@ -270,13 +283,13 @@ class KancolleStatus:
         :type pic: String
         """
         pos = self.pos_map[pos]
-        bx = self.x + pos[0]
-        by = self.y + pos[1]
+        bx = int(self.x * self.x_base_rate + pos[0] * self.x_rate)
+        by = int(self.y * self.x_base_rate + pos[1] * self.y_rate)
         bitmap = self.pic_map[pic]
         print '检查图片', pic
         c = 0
         while True:
-            ret = kancolle_img.find_bitmap(bitmap, (bx, by))
+            ret = kancolle_img.find_bitmap(bitmap, (bx, by), int(50 * self.x_base_rate))
             if ret is None:
                 self.__wait(1, 0.5)
                 c += 1
@@ -299,6 +312,9 @@ class KancolleStatus:
             self.__wait_check(temp[0], temp[1])
         self.status = page
         self.__wait()
+
+    def gotos(self):
+            self.__goto('page_mugang')
 
     def __sysn_status(self):
         pass
@@ -420,7 +436,7 @@ class KancolleStatus:
             self.__wait(300, 100)
 
 
-ks = KancolleStatus()
+ks = KancolleStatus(10,46)
 # ks.return_mugang()
 # ks.retrive_yuanzheng()
 # ks.retrive_yuanzheng()
@@ -430,9 +446,10 @@ ks = KancolleStatus()
 # ks.goto_yuanzheng()
 # ks.send_yuanzheng(3,11)
 
-ks.set_yz(2, 2)
-ks.set_yz(3, 5)
-ks.set_yz(4, 6)
-ks.enable_auto_yz()
+#ks.set_yz(2, 2)
+#ks.set_yz(3, 5)
+#ks.set_yz(4, 6)
+#ks.enable_auto_yz()
 
-# ks.reset_base()
+#ks.reset_base()
+ks.gotos()
