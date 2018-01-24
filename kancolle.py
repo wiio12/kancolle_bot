@@ -424,19 +424,20 @@ class KancolleStatus:
     def enable_auto_yz(self):
         self.__sysn_status()
         while True:
-            yzlst = self.auto_retrive()
+            yzlst = self.auto_retrive() # 这一步是收操作，并返回一个真正补给过的队伍的数组
             if yzlst is not None:
+                # 这一步是发操作，操作结束后的页面是远征列表页面
                 self.goto_yuanzheng()
                 self.__wait()
                 for i in yzlst:
                     if self.YZ_set[i] != 0:
                         self.send_yuanzheng(i, self.YZ_set[i])
                         self.__wait()
-            self.__goto('page_mugang')
+            self.__goto('page_mugang') # 这一步是从远征列表页面跳转至母港页面
             self.__wait(300, 100)
 
 
-ks = KancolleStatus(10,46)
+ks = KancolleStatus(10, 46)
 # ks.return_mugang()
 # ks.retrive_yuanzheng()
 # ks.retrive_yuanzheng()
@@ -446,10 +447,10 @@ ks = KancolleStatus(10,46)
 # ks.goto_yuanzheng()
 # ks.send_yuanzheng(3,11)
 
-#ks.set_yz(2, 2)
-#ks.set_yz(3, 5)
-#ks.set_yz(4, 6)
-#ks.enable_auto_yz()
+ks.set_yz(2, 2)
+ks.set_yz(3, 5)
+ks.set_yz(4, 6)
+ks.enable_auto_yz()
 
 #ks.reset_base()
 ks.gotos()
